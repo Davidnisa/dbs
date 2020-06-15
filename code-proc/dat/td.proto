@@ -1,19 +1,9 @@
 syntax = "proto3";
 
-///usr/local/postgresql/bin/psql -U david -W pds
-
-/**td**/
-message Td
-{
-	string 				name 		= 1;
-	int32				value 		= 2;
-}
-
 /**cond**/
 message Cond
 {
-	string 				s 		= 1;
-	int32 				v 		= 2;
+	int32 				rid 		= 1;
 }
 
 /**user**/

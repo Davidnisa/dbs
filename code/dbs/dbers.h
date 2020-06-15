@@ -14,7 +14,6 @@
 #include <google/protobuf/message.h>
 #include <mysql.h>
 #include <libpq-fe.h>
-#include <sqlite3.h>
 
 namespace dbs
 {
@@ -23,8 +22,6 @@ namespace dbs
 #define _dbs_mysql_ 0
 /**postgresql**/
 #define _dbs_postgresql_ 1
-/**sqlite**/
-#define _dbs_sqlite_ 2
 
 /**gets**/
 #define _dbs_gets_ 0
@@ -34,11 +31,6 @@ namespace dbs
 #define _dbs_update_ 2
 /**remove**/
 #define _dbs_remove_ 3
-
-/**mongo db**/
-#define _dbs_mongodb_ 100
-/**redis**/
-#define _dbs_redis_ 200
 
 /**cmd**/
 class Cmd;
@@ -69,7 +61,6 @@ struct _dber_sock_t_
 	int32_t								_inUse 				= false;
 	MYSQL 								*_mysql 			= nullptr;
 	PGconn								*_postgresql 		= nullptr;
-	sqlite3								*_sqlite3 			= nullptr;
 	struct _dber_t_ 					*_dber 				= nullptr;
 	struct _dber_sock_t_ 				*_prev 				= nullptr;
 	struct _dber_sock_t_ 				*_next 				= nullptr;	
@@ -160,10 +151,6 @@ struct _cmd_format_append_string_t_
 			PQescapeStringConn(sock->_postgresql, bufs, arg.c_str(), arg.length(), &error);
 
 			s.append(bufs);
-		}
-		else if(sock->_dber->_type == _dbs_sqlite_)
-		{
-			s.append(arg); 
 		}
 		else
 		{
@@ -360,8 +347,49 @@ struct _cmd_format_t_<Tuple, 0>
 	}
 };
 
+/**result**/
+class Result
+{
+public:
+	Result();
+	~Result();
+public:
+	/**affected**/
+	uint64_t affected();
+	/**affected**/
+	void setAffected(uint64_t affected);
+	/**is error**/
+	bool isError();
+	/**error**/
+	void error();
+	/**str**/
+	std::string str();
+	/**str**/
+	void setStr(std::string str);
+protected:
+	/**affected**/
+	uint64_t 																		_affected 				= 0;
+	/**error**/
+	bool																			_error 					= false;
+	/**str**/
+	std::string 																	_str;
+};
+
+/**affected**/
+inline uint64_t Result::affected() { return this->_affected; }
+/**affected**/
+inline void Result::setAffected(uint64_t affected) { this->_affected = affected; }
+/**is error**/
+inline bool Result::isError() { return this->_error; }
+/**error**/
+inline void Result::error() { this->_error = true; }
+/**str**/
+inline std::string Result::str() { return this->_str; }
+/**str**/
+inline void Result::setStr(std::string str) { this->_str = str; }
+
 /**daterd**/
-class Daterd
+class Daterd:public Result
 {
 public:
 	Daterd();
@@ -457,35 +485,38 @@ inline T *Dater<T>::get()
 {
 	::google::protobuf::Message *dat = nullptr;
 
-	if(this->_sock->_dber->_type == _dbs_mysql_)
+	if(this->_sock != nullptr)
 	{
-		if(this->_mysqlRss != nullptr)
+		if(this->_sock->_dber->_type == _dbs_mysql_)
 		{
-			MYSQL_ROW row;
-			if((row = mysql_fetch_row(this->_mysqlRss)) != nullptr)
+			if(this->_mysqlRss != nullptr)
 			{
-				dat = this->_prototype->New();
-				for(int32_t i = 0;i < this->_fieldCount;i++)
+				MYSQL_ROW row;
+				if((row = mysql_fetch_row(this->_mysqlRss)) != nullptr)
 				{
-					if(this->_fieldDescriptors[i] != nullptr)
-						this->copyDat(dat, this->_fieldDescriptors[i], row[i]);
+					dat = this->_prototype->New();
+					for(int32_t i = 0;i < this->_fieldCount;i++)
+					{
+						if(this->_fieldDescriptors[i] != nullptr)
+							this->copyDat(dat, this->_fieldDescriptors[i], row[i]);
+					}
 				}
 			}
 		}
-	}
-	else if(this->_sock->_dber->_type == _dbs_postgresql_)
-	{
-		if(this->_postgresqlRss != nullptr)
+		else if(this->_sock->_dber->_type == _dbs_postgresql_)
 		{
-			if(this->_postgresqlRssI < this->_postgresqlRssN)
+			if(this->_postgresqlRss != nullptr)
 			{
-				dat = this->_prototype->New();
-				for(int32_t i = 0;i < this->_fieldCount;i++)
+				if(this->_postgresqlRssI < this->_postgresqlRssN)
 				{
-					if(this->_fieldDescriptors[i] != nullptr)
-						this->copyDat(dat, this->_fieldDescriptors[i], PQgetvalue(this->_postgresqlRss, this->_postgresqlRssI, i));
+					dat = this->_prototype->New();
+					for(int32_t i = 0;i < this->_fieldCount;i++)
+					{
+						if(this->_fieldDescriptors[i] != nullptr)
+							this->copyDat(dat, this->_fieldDescriptors[i], PQgetvalue(this->_postgresqlRss, this->_postgresqlRssI, i));
+					}
+					this->_postgresqlRssI++;
 				}
-				this->_postgresqlRssI++;
 			}
 		}
 	}
@@ -605,13 +636,11 @@ public:
 	static void addMysql(int32_t id, std::string hname, int32_t port, std::string uname, std::string pwd, std::string dbname, int32_t count);
 	/**add postgresql**/
 	static void addPostgresql(int32_t id, std::string hname, int32_t port, std::string uname, std::string pwd, std::string dbname, int32_t count);
-	/**add sqlite3**/
-	static void addSqlite3(int32_t id, std::string path, int32_t count);
 	/**get datas**/
 	template <typename ...Args>
 	static void gets(Daterd *dater, int32_t id, std::string str, Args... args);
 	/**get datas**/
-	static void getsd(Daterd *dater, int32_t id, std::string str, ::google::protobuf::Message *dat);
+	static void getsd(Daterd *dater, int32_t id, std::string str, ::google::protobuf::Message *cond);
 	/**get datas**/
 	template <typename ...Args>
 	static void getsg(Daterd *dater, int32_t id, std::string cond, Args... args);
@@ -621,32 +650,32 @@ public:
 	static void getsgdc(Daterd *dater, int32_t id, ::google::protobuf::Message *dat);
 	/**add data**/
 	template <typename ...Args>
-	static uint64_t add(int32_t id, std::string str, Args... args);
+	static Result *add(int32_t id, std::string str, Args... args);
 	/**add data**/
-	static uint64_t addd(int32_t id, std::string str, ::google::protobuf::Message *dat);
+	static Result *addd(int32_t id, std::string str, ::google::protobuf::Message *dat);
 	/**add data**/
-	static uint64_t addgd(int32_t id, ::google::protobuf::Message *dat);
+	static Result *addgd(int32_t id, ::google::protobuf::Message *dat);
 	/**update data**/
 	template <typename ...Args>
-	static uint64_t update(int32_t id, std::string str, Args... args);
+	static Result *update(int32_t id, std::string str, Args... args);
 	/**update data**/
 	template <typename ...Args>
-	static uint64_t updatedg(int32_t id, ::google::protobuf::Message *dat, std::string cond, Args... args);
+	static Result *updatedg(int32_t id, ::google::protobuf::Message *dat, std::string cond, Args... args);
 	/**update data**/
 	template <typename ...Args>
-	static uint64_t updatedgc(int32_t id, ::google::protobuf::Message *dat, ::google::protobuf::Message *cond);
+	static Result *updatedgc(int32_t id, ::google::protobuf::Message *dat, ::google::protobuf::Message *cond);
 	/**remove data**/
 	template <typename ...Args>
-	static uint64_t remove(int32_t id, std::string str, Args... args);
+	static Result *remove(int32_t id, std::string str, Args... args);
 	/**remove data**/
-	static uint64_t removegd(int32_t id,::google::protobuf::Message *dat);
+	static Result *removegd(int32_t id,::google::protobuf::Message *dat);
 	/**release**/
 	static void release(struct _dber_sock_t_ *sock);
 private:
 	/**get datas**/
 	static void getDats(Daterd *dater, struct _dber_sock_t_ *sock, std::string str);
 	/**opt data**/
-	static uint64_t optDat(struct _dber_sock_t_ *sock, int32_t type, std::string str);
+	static Result *optDat(struct _dber_sock_t_ *sock, int32_t type, std::string str);
 private:
 	/**add dber**/
 	static void addDber(int32_t id, int32_t type, std::string hname, int32_t port, std::string uname, std::string pwd, std::string dbname, int32_t count);
@@ -687,12 +716,6 @@ inline void Dbers::addMysql(int32_t id, std::string hname, int32_t port, std::st
 inline void Dbers::addPostgresql(int32_t id, std::string hname, int32_t port, std::string uname, std::string pwd, std::string dbname, int32_t count)
 {
 	Dbers::addDber(id, _dbs_postgresql_, hname, port, uname, pwd, dbname, count);
-}
-
-/**add sqlite3**/
-inline void Dbers::addSqlite3(int32_t id, std::string path, int32_t count)
-{
-	Dbers::addDber(id, _dbs_sqlite_, path, -1, "", "", "", count);
 }
 
 /**get datas**/
@@ -739,79 +762,79 @@ inline void Dbers::getsgdc(Daterd *dater, int32_t id, ::google::protobuf::Messag
 
 /**add data**/
 template <typename ...Args>
-inline uint64_t Dbers::add(int32_t id, std::string str, Args... args)
+inline Result *Dbers::add(int32_t id, std::string str, Args... args)
 {
 	struct _dber_sock_t_ *sock = Dbers::checkSock(id);
 	if(sock != nullptr)
 		return Dbers::optDat(sock, _dbs_add_, Cmd::format(sock, str, std::forward<Args>(args)...));
-	return 0;
+	return nullptr;
 }
 
 /**add data**/
-inline uint64_t Dbers::addd(int32_t id, std::string str, ::google::protobuf::Message *dat)
+inline Result *Dbers::addd(int32_t id, std::string str, ::google::protobuf::Message *dat)
 {
 	struct _dber_sock_t_ *sock = Dbers::checkSock(id);
 	if(sock != nullptr)
 		return Dbers::optDat(sock, _dbs_add_, Cmd::formatd(sock, str, dat));
-	return 0;
+	return nullptr;
 }
 
 /**add data**/
-inline uint64_t Dbers::addgd(int32_t id, ::google::protobuf::Message *dat)
+inline Result *Dbers::addgd(int32_t id, ::google::protobuf::Message *dat)
 {
 	struct _dber_sock_t_ *sock = Dbers::checkSock(id);
 	if(sock != nullptr)
 		return Dbers::optDat(sock, _dbs_add_, Cmd::formatAddgd(sock, dat));
-	return 0;
+	return nullptr;
 }
 
 /**update data**/
 template <typename ...Args>
-inline uint64_t Dbers::update(int32_t id, std::string str, Args... args)
+inline Result *Dbers::update(int32_t id, std::string str, Args... args)
 {
 	struct _dber_sock_t_ *sock = Dbers::checkSock(id);
 	if(sock != nullptr)
 		return Dbers::optDat(sock, _dbs_update_, Cmd::format(sock, str, std::forward<Args>(args)...));
-	return 0;
+	return nullptr;
 }
 
 /**update data**/
 template <typename ...Args>
-inline uint64_t Dbers::updatedg(int32_t id, ::google::protobuf::Message *dat, std::string cond, Args... args)
+inline Result *Dbers::updatedg(int32_t id, ::google::protobuf::Message *dat, std::string cond, Args... args)
 {
 	struct _dber_sock_t_ *sock = Dbers::checkSock(id);
 	if(sock != nullptr)
 		return Dbers::optDat(sock, _dbs_update_, Cmd::formatUpdatedg(sock, dat, cond, std::forward<Args>(args)...));
-	return 0;
+	return nullptr;
 }
 
 /**update data**/
 template <typename ...Args>
-inline uint64_t Dbers::updatedgc(int32_t id, ::google::protobuf::Message *dat, ::google::protobuf::Message *cond)
+inline Result *Dbers::updatedgc(int32_t id, ::google::protobuf::Message *dat, ::google::protobuf::Message *cond)
 {
 	struct _dber_sock_t_ *sock = Dbers::checkSock(id);
 	if(sock != nullptr)
 		return Dbers::optDat(sock, _dbs_update_, Cmd::formatUpdatedgc(sock, dat, cond));
-	return 0;
+	return nullptr;
 }
 
 /**remove data**/
 template <typename ...Args>
-inline uint64_t Dbers::remove(int32_t id, std::string str, Args... args)
+inline Result *Dbers::remove(int32_t id, std::string str, Args... args)
 {
 	struct _dber_sock_t_ *sock = Dbers::checkSock(id);
 	if(sock != nullptr)
 		return Dbers::optDat(sock, _dbs_remove_, Cmd::format(sock, str, std::forward<Args>(args)...));
-	return 0;
+	return nullptr;
 }
 
 /**remove data**/
-inline uint64_t Dbers::removegd(int32_t id,::google::protobuf::Message *dat)
+inline Result *Dbers::removegd(int32_t id,::google::protobuf::Message *dat)
 {
 	struct _dber_sock_t_ *sock = Dbers::checkSock(id);
 	if(sock != nullptr)
 		return Dbers::optDat(sock, _dbs_remove_, Cmd::formatRemovegd(sock, dat));
-	return 0;
+	return nullptr;
 }
 
 /**release**/

@@ -21,7 +21,7 @@ std::string Cmd::formatGetsd(struct _dber_sock_t_ *sock, const ::google::protobu
 {
 	std::string s;
 
-	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_ || sock->_dber->_type == _dbs_sqlite_)
+	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_)
 	{
 		s = "select ";
 
@@ -65,7 +65,7 @@ std::string Cmd::formatAddgd(struct _dber_sock_t_ *sock, ::google::protobuf::Mes
 
 	const ::google::protobuf::Descriptor *descriptor = dat->GetDescriptor();
 
-	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_ || sock->_dber->_type == _dbs_sqlite_)
+	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_)
 	{
 		s = "insert into ";
 		std::string values = "values(";
@@ -122,7 +122,7 @@ std::string Cmd::formatRemovegd(struct _dber_sock_t_ *sock, ::google::protobuf::
 
 	const ::google::protobuf::Descriptor *descriptor = dat->GetDescriptor();
 
-	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_ || sock->_dber->_type == _dbs_sqlite_)
+	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_)
 	{
 		s = "delete from ";
 
@@ -147,7 +147,7 @@ std::string Cmd::formatUpdateHead(struct _dber_sock_t_ *sock, ::google::protobuf
 
 	const ::google::protobuf::Descriptor *descriptor = dat->GetDescriptor();
 
-	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_ || sock->_dber->_type == _dbs_sqlite_)
+	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_)
 	{
 		s = "update ";
 
@@ -183,7 +183,7 @@ std::string Cmd::formatCond(struct _dber_sock_t_ *sock, ::google::protobuf::Mess
 
 	const ::google::protobuf::Descriptor *descriptor = dat->GetDescriptor();
 
-	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_ || sock->_dber->_type == _dbs_sqlite_)
+	if(sock->_dber->_type == _dbs_mysql_ || sock->_dber->_type == _dbs_postgresql_)
 	{
 		s = "where ";
 
@@ -208,6 +208,16 @@ std::string Cmd::formatCond(struct _dber_sock_t_ *sock, ::google::protobuf::Mess
 	return s;
 }
 
+Result::Result()
+{
+
+}
+
+Result::~Result()
+{
+
+}
+
 Daterd::Daterd()
 {
 
@@ -223,6 +233,9 @@ void Daterd::close()
 {
 	this->_descriptor = nullptr;
 	this->_prototype = nullptr;
+
+	this->_error = false;
+	this->_str.clear();
 
 	if(this->_mysqlRss != nullptr)
 		mysql_free_result(this->_mysqlRss);
@@ -360,53 +373,64 @@ void Dbers::getDats(Daterd *dater, struct _dber_sock_t_ *sock, std::string str)
 {
 	if(sock->_dber->_type == _dbs_mysql_)
 	{
+		dater->setStr(str);
 		if(mysql_query(sock->_mysql, (char *)str.c_str()) == 0)
 		{
 			dater->bind(sock, mysql_store_result(sock->_mysql));
 		}
 		else
 		{
-
+			dater->error();
+			Dbers::releaseSock(sock);
 		}
 	}
 	else
 	{
-		printf("------->%s\n", str.c_str());
+		Dbers::releaseSock(sock);
 	}
 }
 
 /**opt data**/
-uint64_t Dbers::optDat(struct _dber_sock_t_ *sock, int32_t type, std::string str)
+Result *Dbers::optDat(struct _dber_sock_t_ *sock, int32_t type, std::string str)
 {
-	uint64_t n = 0;
+	Result *rs = new Result();
 	if(sock->_dber->_type == _dbs_mysql_)
 	{
+		rs->setStr(str);
 		if(mysql_query(sock->_mysql, (char *)str.c_str()) == 0)
 		{
 			if(type == _dbs_add_)
 			{
-				n = mysql_insert_id(sock->_mysql);
-				if(n <= 0)
-					n = mysql_affected_rows(sock->_mysql);
+				rs->setAffected(mysql_insert_id(sock->_mysql));
+				if(rs->affected() <= 0)
+					rs->setAffected(mysql_affected_rows(sock->_mysql));
 			}
 			else
 			{
-				n = mysql_affected_rows(sock->_mysql);
+				rs->setAffected(mysql_affected_rows(sock->_mysql));
 			}
 		}
-	}
-	if(sock->_dber->_type == _dbs_postgresql_)
-	{
-		PGresult *rss = PQexec(sock->_postgresql, str.c_str());
-		if(PQresultStatus(rss) == PGRES_COMMAND_OK)
+		else
 		{
-			PQclear(rss);
-			n = 1;
+			rs->error();
 		}
 	}
+	else if(sock->_dber->_type == _dbs_postgresql_)
+	{
+		rs->setStr(str);
+		PGresult *rss = PQexec(sock->_postgresql, str.c_str());
+		if(PQresultStatus(rss) == PGRES_COMMAND_OK)
+			rs->setAffected(1);
+		else
+			rs->error();
+		PQclear(rss);
+	}
+	else
+	{
+		rs->error();
+	}
 	Dbers::releaseSock(sock);
-	printf("------->type:%d, %s\n", type, str.c_str());
-	return n;
+	return rs;
 }
 
 /**add dber**/
@@ -573,26 +597,6 @@ bool Dbers::connectSock(struct _dber_sock_t_ *sock)
 		{
 			PQreset(sock->_postgresql);
 			r = true;
-		}
-	}
-	if(sock->_dber->_type == _dbs_sqlite_)
-	{
-		if(sock->_sqlite3 != nullptr)
-		{
-			sqlite3_close(sock->_sqlite3);
-			sock->_sqlite3 = nullptr;
-		}
-		if(sock->_sqlite3 == nullptr)
-		{
-			if(sqlite3_open((char *)sock->_dber->_hname.c_str(), &sock->_sqlite3) == 0)
-			{
-				r = true;
-			}
-			else
-			{
-				sqlite3_close(sock->_sqlite3);
-				sock->_sqlite3 = nullptr;
-			}
 		}
 	}
 	return r;

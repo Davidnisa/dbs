@@ -47,7 +47,7 @@ struct TableStruct_dat_2ftd_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[3]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[2]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -57,163 +57,15 @@ extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table
 class Cond;
 class CondDefaultTypeInternal;
 extern CondDefaultTypeInternal _Cond_default_instance_;
-class Td;
-class TdDefaultTypeInternal;
-extern TdDefaultTypeInternal _Td_default_instance_;
 class User;
 class UserDefaultTypeInternal;
 extern UserDefaultTypeInternal _User_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
 template<> ::Cond* Arena::CreateMaybeMessage<::Cond>(Arena*);
-template<> ::Td* Arena::CreateMaybeMessage<::Td>(Arena*);
 template<> ::User* Arena::CreateMaybeMessage<::User>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 
 // ===================================================================
-
-class Td :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Td) */ {
- public:
-  Td();
-  virtual ~Td();
-
-  Td(const Td& from);
-  Td(Td&& from) noexcept
-    : Td() {
-    *this = ::std::move(from);
-  }
-
-  inline Td& operator=(const Td& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline Td& operator=(Td&& from) noexcept {
-    if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const Td& default_instance();
-
-  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const Td* internal_default_instance() {
-    return reinterpret_cast<const Td*>(
-               &_Td_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    0;
-
-  friend void swap(Td& a, Td& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(Td* other) {
-    if (other == this) return;
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline Td* New() const final {
-    return CreateMaybeMessage<Td>(nullptr);
-  }
-
-  Td* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<Td>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const Td& from);
-  void MergeFrom(const Td& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  #else
-  bool MergePartialFromCodedStream(
-      ::PROTOBUF_NAMESPACE_ID::io::CodedInputStream* input) final;
-  #endif  // GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-  void SerializeWithCachedSizes(
-      ::PROTOBUF_NAMESPACE_ID::io::CodedOutputStream* output) const final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* InternalSerializeWithCachedSizesToArray(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(Td* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Td";
-  }
-  private:
-  inline ::PROTOBUF_NAMESPACE_ID::Arena* GetArenaNoVirtual() const {
-    return nullptr;
-  }
-  inline void* MaybeArenaPtr() const {
-    return nullptr;
-  }
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_dat_2ftd_2eproto);
-    return ::descriptor_table_dat_2ftd_2eproto.file_level_metadata[kIndexInFileMessages];
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kNameFieldNumber = 1,
-    kValueFieldNumber = 2,
-  };
-  // string name = 1;
-  void clear_name();
-  const std::string& name() const;
-  void set_name(const std::string& value);
-  void set_name(std::string&& value);
-  void set_name(const char* value);
-  void set_name(const char* value, size_t size);
-  std::string* mutable_name();
-  std::string* release_name();
-  void set_allocated_name(std::string* name);
-
-  // int32 value = 2;
-  void clear_value();
-  ::PROTOBUF_NAMESPACE_ID::int32 value() const;
-  void set_value(::PROTOBUF_NAMESPACE_ID::int32 value);
-
-  // @@protoc_insertion_point(class_scope:Td)
- private:
-  class _Internal;
-
-  ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
-  ::PROTOBUF_NAMESPACE_ID::int32 value_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_dat_2ftd_2eproto;
-};
-// -------------------------------------------------------------------
 
 class Cond :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Cond) */ {
@@ -257,7 +109,7 @@ class Cond :
                &_Cond_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    0;
 
   friend void swap(Cond& a, Cond& b) {
     a.Swap(&b);
@@ -328,32 +180,19 @@ class Cond :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kSFieldNumber = 1,
-    kVFieldNumber = 2,
+    kRidFieldNumber = 1,
   };
-  // string s = 1;
-  void clear_s();
-  const std::string& s() const;
-  void set_s(const std::string& value);
-  void set_s(std::string&& value);
-  void set_s(const char* value);
-  void set_s(const char* value, size_t size);
-  std::string* mutable_s();
-  std::string* release_s();
-  void set_allocated_s(std::string* s);
-
-  // int32 v = 2;
-  void clear_v();
-  ::PROTOBUF_NAMESPACE_ID::int32 v() const;
-  void set_v(::PROTOBUF_NAMESPACE_ID::int32 value);
+  // int32 rid = 1;
+  void clear_rid();
+  ::PROTOBUF_NAMESPACE_ID::int32 rid() const;
+  void set_rid(::PROTOBUF_NAMESPACE_ID::int32 value);
 
   // @@protoc_insertion_point(class_scope:Cond)
  private:
   class _Internal;
 
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr s_;
-  ::PROTOBUF_NAMESPACE_ID::int32 v_;
+  ::PROTOBUF_NAMESPACE_ID::int32 rid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_dat_2ftd_2eproto;
 };
@@ -401,7 +240,7 @@ class User :
                &_User_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    1;
 
   friend void swap(User& a, User& b) {
     a.Swap(&b);
@@ -538,140 +377,20 @@ class User :
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
-// Td
-
-// string name = 1;
-inline void Td::clear_name() {
-  name_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline const std::string& Td::name() const {
-  // @@protoc_insertion_point(field_get:Td.name)
-  return name_.GetNoArena();
-}
-inline void Td::set_name(const std::string& value) {
-  
-  name_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:Td.name)
-}
-inline void Td::set_name(std::string&& value) {
-  
-  name_.SetNoArena(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:Td.name)
-}
-inline void Td::set_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  name_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:Td.name)
-}
-inline void Td::set_name(const char* value, size_t size) {
-  
-  name_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:Td.name)
-}
-inline std::string* Td::mutable_name() {
-  
-  // @@protoc_insertion_point(field_mutable:Td.name)
-  return name_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline std::string* Td::release_name() {
-  // @@protoc_insertion_point(field_release:Td.name)
-  
-  return name_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline void Td::set_allocated_name(std::string* name) {
-  if (name != nullptr) {
-    
-  } else {
-    
-  }
-  name_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), name);
-  // @@protoc_insertion_point(field_set_allocated:Td.name)
-}
-
-// int32 value = 2;
-inline void Td::clear_value() {
-  value_ = 0;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Td::value() const {
-  // @@protoc_insertion_point(field_get:Td.value)
-  return value_;
-}
-inline void Td::set_value(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
-  value_ = value;
-  // @@protoc_insertion_point(field_set:Td.value)
-}
-
-// -------------------------------------------------------------------
-
 // Cond
 
-// string s = 1;
-inline void Cond::clear_s() {
-  s_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+// int32 rid = 1;
+inline void Cond::clear_rid() {
+  rid_ = 0;
 }
-inline const std::string& Cond::s() const {
-  // @@protoc_insertion_point(field_get:Cond.s)
-  return s_.GetNoArena();
+inline ::PROTOBUF_NAMESPACE_ID::int32 Cond::rid() const {
+  // @@protoc_insertion_point(field_get:Cond.rid)
+  return rid_;
 }
-inline void Cond::set_s(const std::string& value) {
+inline void Cond::set_rid(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
-  s_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:Cond.s)
-}
-inline void Cond::set_s(std::string&& value) {
-  
-  s_.SetNoArena(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:Cond.s)
-}
-inline void Cond::set_s(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  s_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:Cond.s)
-}
-inline void Cond::set_s(const char* value, size_t size) {
-  
-  s_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:Cond.s)
-}
-inline std::string* Cond::mutable_s() {
-  
-  // @@protoc_insertion_point(field_mutable:Cond.s)
-  return s_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline std::string* Cond::release_s() {
-  // @@protoc_insertion_point(field_release:Cond.s)
-  
-  return s_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline void Cond::set_allocated_s(std::string* s) {
-  if (s != nullptr) {
-    
-  } else {
-    
-  }
-  s_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), s);
-  // @@protoc_insertion_point(field_set_allocated:Cond.s)
-}
-
-// int32 v = 2;
-inline void Cond::clear_v() {
-  v_ = 0;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Cond::v() const {
-  // @@protoc_insertion_point(field_get:Cond.v)
-  return v_;
-}
-inline void Cond::set_v(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
-  v_ = value;
-  // @@protoc_insertion_point(field_set:Cond.v)
+  rid_ = value;
+  // @@protoc_insertion_point(field_set:Cond.rid)
 }
 
 // -------------------------------------------------------------------
@@ -802,8 +521,6 @@ inline void User::set_ltime(::PROTOBUF_NAMESPACE_ID::int32 value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 
