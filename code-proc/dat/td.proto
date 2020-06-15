@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+///usr/local/postgresql/bin/psql -U david -W pds
+
+/**td**/
+message Td
+{
+	string 				name 		= 1;
+	int32				value 		= 2;
+}
+
+/**cond**/
+message Cond
+{
+	string 				s 		= 1;
+	int32 				v 		= 2;
+}
+
+/**user**/
+message User
+{
+	int32				rid 	= 1;
+	string				name 	= 2;
+	int32				coin 	= 3;
+	int32 				gold 	= 4;
+	int32				rtime 	= 5;
+	int32				ltime 	= 6;
+}
